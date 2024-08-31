@@ -14,3 +14,16 @@ RUN wget https://go.dev/dl/go1.23.0.linux-amd64.tar.gz
 RUN tar -C /usr/local -xzf go1.23.0.linux-amd64.tar.gz
 
 CMD ["/bin/bash"]
+
+
+FROM dev AS build
+
+COPY . /api
+RUN /usr/local/go/bin/go build /api/main.go
+
+
+FROM base AS prod
+
+COPY --from=build /api/main /api/server
+
+CMD ["/api/server"]
