@@ -34,3 +34,16 @@ services:
     command: /bin/bash
     tty: true
     stdin_open: true
+  nginx:
+    image: nginx:latest
+    ports:
+      - target: 3000
+        published: 3000
+    volumes:
+      - type: bind
+        source: './nginx'
+        target: '/etc/nginx/conf.d'
+    depends_on:
+      - api
+    tty: true
+    stdin_open: true
