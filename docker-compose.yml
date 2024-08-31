@@ -1,0 +1,17 @@
+version: '3.9'
+
+services:
+  api-dev:
+    build:
+      context: './api'
+      dockerfile: './Dockerfile'
+      target: dev
+    tty: true
+    volumes:
+      - type: bind
+        source: ./api
+        target: /api
+    working_dir: /api
+    ports:
+      - target: 8080
+        published: 8080
