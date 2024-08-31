@@ -18,11 +18,12 @@ CMD ["/bin/bash"]
 FROM dev AS build
 
 COPY . /api
-RUN /usr/local/go/bin/go build /api/main.go
+RUN /usr/local/go/bin/go clean
+RUN /usr/local/go/bin/go build -o /tmp/main /api/main.go
 
 
 FROM base AS prod
 
-COPY --from=build /api/main /api/server
+COPY --from=build /tmp/main /api/server
 
 CMD ["/api/server"]
