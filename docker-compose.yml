@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
   api:
     build:
@@ -9,7 +7,11 @@ services:
     ports:
       - target: 8080
         published: 8080
-    tty: true
+    logging:
+      driver: json-file
+      options:
+        max-size: 1m
+        max-file: '3'
   api-dev:
     build:
       context: './api'
@@ -21,7 +23,7 @@ services:
         target: /api
     working_dir: /api
     ports:
-      - target: 8080
-        published: 8080
+      - target: 8081
+        published: 8081
     tty: true
     stdin_open: true

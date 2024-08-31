@@ -1,7 +1,6 @@
 FROM ubuntu:24.04 AS base
 
 RUN apt update && apt upgrade -y
-RUN apt install -y sudo
 
 
 FROM base AS dev
