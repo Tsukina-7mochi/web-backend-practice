@@ -7,6 +7,13 @@ import (
 	"os"
 )
 
+func printLog(handler http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		log.Printf("%v: %v", req.Method, req.URL)
+		handler.ServeHTTP(w, req)
+	})
+}
+
 func ping(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprintf(w, "pong")
 }
@@ -23,6 +30,6 @@ func main() {
 	}
 
 	http.HandleFunc("/ping", ping)
-	fmt.Printf("Server listening on %v:%v", addr, port)
-	log.Fatal(http.ListenAndServe(addr+":"+port, nil))
+	log.Printf("Server listening on %v:%v", addr, port)
+	log.Fatal(http.ListenAndServe(addr+":"+port, printLog(http.DefaultServeMux)))
 }
