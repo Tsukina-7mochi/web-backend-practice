@@ -3,6 +3,8 @@ package mydb
 import (
 	"database/sql"
 	"fmt"
+
+	"github.com/lib/pq"
 )
 
 type User struct {
@@ -128,6 +130,18 @@ func (myDB *MyDB) GetUser(name string) (*User, error) {
 	}, nil
 }
 
+func (myDB *MyDB) DeleteUser(id int) error {
+	db := myDB.db
+
+	_, err := db.Exec(`DELETE FROM todos WHERE user_id = $1;`, id)
+	if err != nil {
+		return err
+	}
+
+	_, err = db.Exec(`DELETE FROM users WHERE id = $1;`, id)
+	return err
+}
+
 func (myDB *MyDB) AddTodo(userID int, title string) (int, error) {
 	db := myDB.db
 
@@ -173,4 +187,20 @@ func (myDB *MyDB) ListByUser(userID int) ([]Todo, error) {
 	}
 
 	return todos, nil
+}
+
+func (myDB *MyDB) PatchTodo(todoID int, done bool) error {
+	db := myDB.db
+
+	_, err := db.Exec(`UPDATE todos SET done = $1 WHERE id = $2;`, done, todoID)
+
+	return err
+}
+
+func (myDB *MyDB) BulkDeleteTodos(ids []int) error {
+	db := myDB.db
+
+	_, err := db.Exec(`DELETE FROM todos WHERE id = ANY($1);`, pq.Array(ids))
+
+	return err
 }

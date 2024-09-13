@@ -56,8 +56,11 @@ func main() {
 	r.HandleFunc("/", handler.NotFound)
 	r.HandleFunc("/ping", handler.Pong)
 	r.HandleFunc("/users", handler.AddUser(db)).Methods("POST")
+	r.HandleFunc("/users/{userID}", handler.DeleteUser(db)).Methods("DELETE")
 	r.HandleFunc("/users/{userID}/todos", handler.AddTodo(db)).Methods("POST")
 	r.HandleFunc("/users/{userID}/todos", handler.ListTodo(db))
+	r.HandleFunc("/users/{userID}/todos/{todoID}", handler.PatchTodoStatus(db)).Methods("PATCH")
+	r.HandleFunc("/users/{userID}/todos/{todoID}", handler.DeleteTodo(db)).Methods("DELETE")
 
 	log.Printf("Server listening on %v:%v", addr, port)
 	log.Fatal(http.ListenAndServe(addr+":"+port, printLog(r)))
