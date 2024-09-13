@@ -37,7 +37,7 @@ func AddUser(db *mydb.MyDB) http.HandlerFunc {
 		}
 
 		w.WriteHeader(http.StatusCreated)
-		fmt.Fprintf(w, "{id:%d}", id)
+		fmt.Fprintf(w, `{"id":%d}`, id)
 	}
 }
 
@@ -102,7 +102,7 @@ func AddTodo(db *mydb.MyDB) http.HandlerFunc {
 		}
 
 		w.WriteHeader(http.StatusCreated)
-		fmt.Fprintf(w, "{id:%d}", id)
+		fmt.Fprintf(w, `{"id":%d}`, id)
 	}
 }
 
