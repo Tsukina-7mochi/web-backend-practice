@@ -11,11 +11,16 @@ WORKDIR /tmp
 RUN apt install -y wget tar
 RUN wget https://go.dev/dl/go1.23.0.linux-amd64.tar.gz
 RUN tar -C /usr/local -xzf go1.23.0.linux-amd64.tar.gz
-ENV PATH $PATH:/usr/local/go/bin
+ENV GOPATH /root/go
+ENV PATH $PATH:/usr/local/go/bin:$GOPATH
+
+RUN go install github.com/air-verse/air@latest
 
 WORKDIR /api
+COPY ./go.mod ./go.sum ./
+RUN go mod download
 
-CMD ["/bin/bash"]
+CMD ["/root/go/bin/air"]
 
 
 FROM dev AS build
