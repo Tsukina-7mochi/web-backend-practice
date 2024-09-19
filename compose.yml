@@ -1,4 +1,5 @@
 services:
+
   api:
     build:
       context: './api'
@@ -20,6 +21,7 @@ services:
       options:
         max-size: 1m
         max-file: '3'
+
   api-dev:
     build:
       context: './api'
@@ -44,6 +46,7 @@ services:
         published: 8081
     tty: true
     stdin_open: true
+
   client:
     build:
       context: './client'
@@ -51,6 +54,7 @@ services:
     command: /bin/bash
     tty: true
     stdin_open: true
+
   db:
     image: postgres:16
     ports:
@@ -60,6 +64,7 @@ services:
       POSTGRES_USER: $POSTGRES_USER
       POSTGRES_PASSWORD: $POSTGRES_PASSWORD
       POSTGRES_DB: $POSTGRES_DB
+
   nginx:
     image: nginx:latest
     ports:
