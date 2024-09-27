@@ -27,17 +27,17 @@ func (r *TodoRepository) Create(userID uint, title string) (int, error) {
 }
 
 func (r *TodoRepository) GetByRef(userID uint, ref string) (*entity.Todo, error) {
-	row := r.db.QueryRow(`SELECT id, user_id, title, done FROM todos WHERE user_id = $1 AND ref = $2;`, userID, ref)
+	row := r.db.QueryRow(`SELECT id, title, done FROM todos WHERE user_id = $1 AND ref = $2;`, userID, ref)
 
-	var id uint
-	var title string
-	var done bool
-	if err := row.Scan(&id, &userID, &title, &done); err != nil {
+	todo := entity.Todo{
+		UserID: userID,
+		Ref:    ref,
+	}
+	if err := row.Scan(&todo.ID, &todo.Title, &todo.Done); err != nil {
 		return nil, err
 	}
 
-	todo := entity.NewTodo(id, ref, userID, title, done)
-	return todo, nil
+	return &todo, nil
 }
 
 func (r *TodoRepository) ListByUserID(userID uint) ([]entity.Todo, error) {
@@ -48,21 +48,12 @@ func (r *TodoRepository) ListByUserID(userID uint) ([]entity.Todo, error) {
 
 	todos := make([]entity.Todo, 0)
 	for rows.Next() {
-		var id uint
-		var ref string
-		var userID uint
-		var title string
-		var done bool
-
-		if err = rows.Scan(&id, &ref, &userID, &title, &done); err != nil {
+		todo := entity.Todo{}
+		if err = rows.Scan(&todo.ID, &todo.Ref, &todo.UserID, &todo.Title, &todo.Done); err != nil {
 			return nil, err
 		}
 
-		todo := entity.NewTodo(id, ref, userID, title, done)
-		todos = append(todos, *todo)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
+		todos = append(todos, todo)
 	}
 
 	return todos, nil

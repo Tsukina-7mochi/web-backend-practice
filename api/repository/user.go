@@ -29,25 +29,27 @@ func (r *UserRepository) Create(name string, displayName string) (uint, error) {
 func (r *UserRepository) Get(id uint) (*entity.User, error) {
 	row := r.db.QueryRow(`SELECT name, display_name FROM users WHERE id = $1;`, id)
 
-	var name string
-	var displayName string
-	if err := row.Scan(&name, &displayName); err != nil {
+	user := entity.User{
+		ID: id,
+	}
+	if err := row.Scan(&user.Name, &user.DisplayName); err != nil {
 		return nil, err
 	}
 
-	return entity.NewUser(id, name, displayName), nil
+	return &user, nil
 }
 
 func (r *UserRepository) GetByName(name string) (*entity.User, error) {
 	row := r.db.QueryRow(`SELECT id, display_name FROM users WHERE name = $1;`, name)
 
-	var id uint
-	var displayName string
-	if err := row.Scan(&id, &displayName); err != nil {
+	user := entity.User{
+		Name: name,
+	}
+	if err := row.Scan(&user.ID, &user.DisplayName); err != nil {
 		return nil, err
 	}
 
-	return entity.NewUser(id, name, displayName), nil
+	return &user, nil
 }
 
 func (r *UserRepository) Delete(id uint) error {

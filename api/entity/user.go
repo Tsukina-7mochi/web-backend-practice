@@ -5,11 +5,3 @@ type User struct {
 	Name        string
 	DisplayName string
 }
-
-func NewUser(id uint, name string, displayName string) *User {
-	return &User{
-		ID:          id,
-		Name:        name,
-		DisplayName: displayName,
-	}
-}
