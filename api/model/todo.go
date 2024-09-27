@@ -1,5 +1,7 @@
 package model
 
+import "main/entity"
+
 type Todo struct {
 	Ref   string `json:"ref"`
 	User  string `json:"user"`
@@ -7,11 +9,11 @@ type Todo struct {
 	Done  bool   `json:"done"`
 }
 
-func NewTodo(ref string, user string, title string, done bool) *Todo {
+func NewTodoFromEntity(todo *entity.Todo, userName string) *Todo {
 	return &Todo{
-		Ref:   ref,
-		User:  user,
-		Title: title,
-		Done:  done,
+		Ref:   todo.Ref,
+		User:  userName,
+		Title: todo.Title,
+		Done:  todo.Done,
 	}
 }

@@ -32,7 +32,7 @@ func (u *UserUsecase) Get(name string) (*model.User, error) {
 		return nil, err
 	}
 
-	return model.NewUser(user.Name, user.DisplayName), nil
+	return model.NewUserFromEntity(user), nil
 }
 
 func (u *UserUsecase) Delete(name string) error {

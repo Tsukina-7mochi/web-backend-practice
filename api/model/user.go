@@ -1,13 +1,15 @@
 package model
 
+import "main/entity"
+
 type User struct {
 	Name        string `json:"name"`
 	DisplayName string `json:"display_name"`
 }
 
-func NewUser(name string, displayName string) *User {
+func NewUserFromEntity(user *entity.User) *User {
 	return &User{
-		Name:        name,
-		DisplayName: displayName,
+		Name:        user.Name,
+		DisplayName: user.DisplayName,
 	}
 }

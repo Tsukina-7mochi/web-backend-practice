@@ -48,7 +48,7 @@ func (u *TodoUsecase) ListByUser(userName string) ([]model.Todo, error) {
 
 	todos := make([]model.Todo, 0, len(todoEntities))
 	for _, todoEntity := range todoEntities {
-		todos = append(todos, *model.NewTodo(todoEntity.Ref, userName, todoEntity.Title, todoEntity.Done))
+		todos = append(todos, *model.NewTodoFromEntity(&todoEntity, userName))
 	}
 
 	return todos, nil
