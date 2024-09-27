@@ -1,9 +1,14 @@
 package main
 
 import (
+	"database/sql"
+	"fmt"
 	"log"
 	"main/handler"
-	"main/mydb"
+	todoHandler "main/handler/todo"
+	userHandler "main/handler/user"
+	. "main/repository"
+	. "main/usecase"
 	"net/http"
 	"os"
 
@@ -20,7 +25,14 @@ func printLog(handler http.Handler) http.Handler {
 
 func main() {
 	addr := os.Getenv("IP")
+	if addr == "" {
+		addr = "0.0.0.0"
+	}
+
 	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
 
 	dbHost := os.Getenv("DB_HOST")
 	dbPort := os.Getenv("DB_PORT")
@@ -28,39 +40,48 @@ func main() {
 	dbPass := os.Getenv("DB_PASS")
 	dbName := os.Getenv("DB_NAME")
 
-	db, err := mydb.Open(mydb.DBInit{
-		Host:     dbHost,
-		Port:     dbPort,
-		User:     dbUser,
-		Password: dbPass,
-		Name:     dbName,
-	})
+	db, err := sql.Open(
+		"postgres",
+		fmt.Sprintf(
+			"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+			dbHost,
+			dbPort,
+			dbUser,
+			dbPass,
+			dbName,
+		),
+	)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Failed to open database: %v", err)
 	}
+	defer db.Close()
 
-	err = db.Init()
-	if err != nil {
-		log.Fatal(err)
-	}
+	userRepository := NewUserRepository(db)
+	todoRepository := NewTodoRepository(db)
 
-	if addr == "" {
-		addr = "0.0.0.0"
-	}
-	if port == "" {
-		port = "8080"
-	}
+	userUsecase := NewUserUsecase(*userRepository)
+	todoUsecase := NewTodoUsecase(*userRepository, *todoRepository)
+
+	createUserHandler := userHandler.NewCreateUserHandler(*userUsecase)
+	getUserHandler := userHandler.NewGetUserHandler(*userUsecase, "userName")
+	deleteUserHandler := userHandler.NewDeleteUserHandler(*userUsecase, "userName")
+	createTodoHandler := todoHandler.NewCreateTodoHandler(*todoUsecase, "userName")
+	listTodoByUserNameHandler := todoHandler.NewListByUserNameHandler(*todoUsecase, "userName")
+	updateTodoDoneHandler := todoHandler.NewUpdateDoneHandler(*todoUsecase, "userName", "todoRef")
+	deleteTodoHandler := todoHandler.NewDeleteTodoHandler(*todoUsecase, "userName", "todoRef")
 
 	r := mux.NewRouter()
 
 	r.HandleFunc("/", handler.NotFound)
-	r.HandleFunc("/ping", handler.Pong)
-	r.HandleFunc("/users", handler.AddUser(db)).Methods("POST")
-	r.HandleFunc("/users/{userID}", handler.DeleteUser(db)).Methods("DELETE")
-	r.HandleFunc("/users/{userID}/todos", handler.AddTodo(db)).Methods("POST")
-	r.HandleFunc("/users/{userID}/todos", handler.ListTodo(db))
-	r.HandleFunc("/users/{userID}/todos/{todoID}", handler.PatchTodoStatus(db)).Methods("PATCH")
-	r.HandleFunc("/users/{userID}/todos/{todoID}", handler.DeleteTodo(db)).Methods("DELETE")
+	r.HandleFunc("/ping", handler.Ping)
+	r.Handle("/users", createUserHandler).Methods("POST")
+	r.Handle("/users/{userName}", getUserHandler).Methods("GET")
+	r.Handle("/users/{userName}", deleteUserHandler).Methods("DELETE")
+
+	r.Handle("/users/{userName}/todos", listTodoByUserNameHandler).Methods("GET")
+	r.Handle("/users/{userName}/todos", createTodoHandler).Methods("POST")
+	r.Handle("/users/{userName}/todos/{todoRef}", updateTodoDoneHandler).Methods("PATCH")
+	r.Handle("/users/{userName}/todos/{todoRef}", deleteTodoHandler).Methods("DELETE")
 
 	log.Printf("Server listening on %v:%v", addr, port)
 	log.Fatal(http.ListenAndServe(addr+":"+port, printLog(r)))
